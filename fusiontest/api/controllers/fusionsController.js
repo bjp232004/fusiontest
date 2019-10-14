@@ -1,45 +1,48 @@
-const YelpClient = require('../classes/yelp');
 const Config = require('../../config');
-
-const yelpclient = new YelpClient(Config.Yelp.API_KEY);
+const querystring = require('querystring');
+const FusionApi = require('../classes/yelpapi');
 
 function fusionsController() {
 	const get = (req, res) => {
-
 		searchRequest = {
-			term: req.body.term,
-			location: req.body.location
+			'limit': 5
 		};
 
-		getBusiness(searchRequest)
-			.then((row) => {
-				return getBusinessReviews(row);
-			})
-			.then((row) => {
-				row = formatData(row)
-				return res.json(row);
-			})
-			.catch((e) => {
-				return res.json({'error': e.message, 'status': '400', 'success': false});
-			});
-	}
+		const params = querystring.parse(req.url.replace(/^.*\?/, ''))
 
-	const getBusiness = async (searchRequest) => {
-			const result = yelpclient.getBusiness(searchRequest);
-			return result;
-	}
-
-	const getBusinessReviews = async (businessData) => {
-		for( i in businessData.businesses) {
-			var item = businessData.businesses[i];
-			const reviewsData = await yelpclient.getBusinessReviews(item.id);
-			businessData.businesses[i].reviews = reviewsData.reviews
+		if(params.term) {
+			searchRequest.term = params.term;
 		}
 
-		return businessData;
+		if(params.location) {
+			searchRequest.location = params.location;
+		} else {
+			searchRequest.location = 'Alpharetta';
+		}
+
+		var cnt = 0;
+		FusionApi.ApiOptions.path = `/v3/businesses/search?${querystring.stringify(searchRequest)}`,
+		FusionApi.callApi(function(response){
+			const businessData = JSON.parse(response);
+			for(const i in businessData.businesses ) {
+				const item = businessData.businesses[i];
+				FusionApi.ApiOptions.path = `/v3/businesses/${item.id}/reviews`;
+				FusionApi.callApi(function(reviewres){
+					const businessreview = JSON.parse(reviewres);
+					businessData.businesses[i].reviews = businessreview.reviews;
+					cnt += 1;
+					if(businessData.businesses.length == cnt) {
+						const finalData = formatData(businessData);
+						res.send(JSON.stringify(finalData));
+						res.end();
+					}
+				});
+			}
+		});
 	}
 
 	const formatData = (businessData) => {
+		// console.log(businessData)
 		finalresult = [];
 		for( i in businessData.businesses) {
 			item = businessData.businesses[i];
@@ -55,7 +58,7 @@ function fusionsController() {
 
 			finalresult.push(data);
 		}
-
+		
 		return finalresult;
 	}
 
