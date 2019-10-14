@@ -61,7 +61,6 @@ class YelpClient {
 		
     // return this.send({
     //   url: 'https://api.yelp.com/v3/businesses/search',
-		// 	// url: 'http://localhost:4000/fusions',
     //   query: parameters,
     //   bearerToken: this.apiKey
     // });
