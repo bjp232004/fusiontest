@@ -1,7 +1,4 @@
-# Fusion Test
-
-#### While signing up into YELP, getting below error. I have created the code but because of below error I have tested with static data which you can see in classes/yelp.js
-### ERROR:Oops, Yelp is overworked right now.
+# Fusion Test Node Code
 
 Follow below steps to setup project into your system.
 
