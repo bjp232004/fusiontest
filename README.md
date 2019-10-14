@@ -8,7 +8,8 @@ cd fusiontest
 
 npm install
 
-npm start # It will start the server
+npm start 
 
-npm test #For now I have created basic structure for test cases. It covers test cases for controller files and integration test which will call Mock API.
+npm test 
+# For now I have created basic structure for test cases. It covers test cases for controller files and integration test which will call Mock API.
 
